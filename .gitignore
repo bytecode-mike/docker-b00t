@@ -55,3 +55,8 @@ local.properties
 /build/
 
 *.nogit.*
+
+#intelij
+.idea
+*.iml
+build
