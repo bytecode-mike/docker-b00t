@@ -1,0 +1,56 @@
+buildscript {
+    ext {
+        springBootVersion = '1.2.3.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
+        classpath('se.transmode.gradle:gradle-docker:1.2')
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'spring-boot'
+apply plugin: 'application'
+apply plugin: 'docker'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jar {
+    baseName = 'perk0ns-web'
+    version =  '0.0.1-SNAPSHOT'
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url "http://repo.spring.io/snapshot" }
+    maven { url "http://repo.spring.io/milestone" }
+}
+
+dependencies {
+ compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.flywaydb:flyway-core")
+    runtime("mysql:mysql-connector-java")
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+}
+
+task buildDocker(type: Docker, dependsOn: build) {
+  push = false
+  dockerfile = file('src/main/docker/Dockerfile')
+  applicationName = jar.baseName
+  doFirst {
+    copy {
+      from jar
+      into stageDir
+    }
+  }
+}

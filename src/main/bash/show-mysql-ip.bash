@@ -1,0 +1,3 @@
+#!/bin/bash
+#set -xv
+docker inspect -f '{{ .NetworkSettings.IPAddress }}' perkonsmysql 
