@@ -157,6 +157,11 @@ This command will start the application (as a daemon) and link it to the mysql c
 Use your favorite browser on *localhost:8080* and you will be able to see the penultimate strophe from the [William Blake, The tiger](http://www.bartleby.com/101/489.html).
 Each verse is stored as a entry in the database, you can add or remove them as you wish.
 
+##### The Database content
+
+The penultimate strophe is added to the database via [flyway](http://flywaydb.org/).
+The configuration is located in *.../resources/db/migration/V1_init.sql*.
+
 As alternative you can use the bash script named *start-myapp.bash* located in the *.../src/main/bash* directory.
 
 Scripts
