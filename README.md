@@ -5,12 +5,43 @@ This projects puts together a simple SpringBoot / AngularJS application and it p
 Usage
 =====
 
+Fast forward
+------------
+
+If you are one of those fast (and hopefully less furious) developers any your
+interests are only the running code here is what you need to do:
+
+### Gradle
+
+    gradle buildDocker
+    
+    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+    
+    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+ 
+ 
+### Maven
+
+    mvn package docker:build
+    
+    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+    
+    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+
+
+How the things really works
+---------------------------
+
+Ok, this will try to explain in detail how this application works.
+
 Fist of all you need to install the Docker container, this is depending on the underling operation system,
 for mode detail about installation consider the [Docker](http://docs.docker.com/mac/started/) site.
 The interaction with Docker can be done over a command line or if you prefer you can use the [Chrome Docker](https://chrome.google.com/webstore/detail/simple-docker-ui-beta/jfaelnolkgonnjdlkfokjadedkacbnib?hl=de) extension.
+
 The application uses MySQL as storage but you don't need to install it on your machine this will be provided as Docker image.
-The project contains some bash scripts (located in the *.../src/main/bash*) yuo can use them for various docker related actions.
-  
+
+The project contains some bash scripts (located in the *.../src/main/bash*) you can use them for various docker related actions.
+
 Build and publish the docker image
 ----------------------------------
 
@@ -18,8 +49,8 @@ The project provides both Gradle and Maven support.
 
 ### Gradle
 
-The gradle task is named *buildDocker* and it is related to the *build* task, it run after it.
-If you want to create a docker image for this project (using gradle) you need to run the following command:
+You can build a Docker image using the*buildDocker* gradle task. 
+The task it is related to the *build* task and it run after it so if you want to create a docker image for this project (using gradle) you need to run the following command:
 
     gradle buildDocker
 
@@ -43,7 +74,7 @@ The *push* flag:
     push = false
     ....
     
-Is used to indicate that created image can be pushed to a [docker hub](https://hub.docker.com/account/signup/) (repository).
+is used to indicate that created image can be pushed to a [docker hub](https://hub.docker.com/account/signup/) (repository).
 By default the official hub is used but you can create your own [private docker repository](https://hub.docker.com/account/signup/).  
 
 
@@ -147,14 +178,19 @@ As alternative you can use the bash script named *start-mysqlserver.bash* locate
 You can start the application by using the following command:
 
     docker run --name perk0nswebapp \
-               --link perkonsmysql:mysql \
+               --link perkonsmysql:localhost \
                -d \
                -p 8080:8080 \
                perk0ns-web
 
-This command will start the application (as a daemon) and link it to the mysql container previous started ( *--link perkonsmysql:mysql* ). 
+This command will start the application (as a daemon) and link it (make it available in the docker container) under the alias *localhost*. The *localhost* is used by the JPA JDBC driver connector, configured with the *application.properties* file (located in the *.../src/resources/application.properties*), here the data-source URL is configured as follow:
 
-Use your favorite browser on *localhost:8080* and you will be able to see the penultimate strophe from the [William Blake, The tiger](http://www.bartleby.com/101/489.html).
+
+    spring.datasource.url=jdbc:mysql://localhost:3306/perkons_db
+
+note, the *localhost* in the URL, is the same as the docker alias. 
+
+Now use your favorite browser on *localhost:8080* and you will be able to see the penultimate strophe from the [William Blake, The tiger](http://www.bartleby.com/101/489.html).
 Each verse is stored as a entry in the database, you can add or remove them as you wish.
 
 ##### The Database content
@@ -162,7 +198,7 @@ Each verse is stored as a entry in the database, you can add or remove them as y
 The penultimate strophe is added to the database via [flyway](http://flywaydb.org/).
 The configuration is located in *.../resources/db/migration/V1_init.sql*.
 
-As alternative you can use the bash script named *start-myapp.bash* located in the *.../src/main/bash* directory.
+As alternative to the command line you can use the bash script named *start-myapp.bash* located in the *.../src/main/bash* directory.
 
 Scripts
 -------
