@@ -23,6 +23,10 @@ apply plugin: 'docker'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.5'
+}
+
 jar {
     baseName = 'perk0ns-web'
     version =  '0.0.1-SNAPSHOT'
