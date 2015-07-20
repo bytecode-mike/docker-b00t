@@ -74,7 +74,6 @@ task buildDocker(type: DockerBuildImage) {
     dependsOn copyDockerFile
     quiet = false
     noCache = false
-    println("------------" + project.buildDir )
     inputDir = project.buildDir
     tag = "dockerboot/$project.name:$project.version"
 }
