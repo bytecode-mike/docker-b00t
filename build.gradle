@@ -3,13 +3,12 @@ buildscript {
         springBootVersion = '1.2.3.RELEASE'
     }
     repositories {
+        jcenter()
         mavenCentral()
-        maven { url "https://repo.spring.io/snapshot" }
-        maven { url "https://repo.spring.io/milestone" }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
-        classpath('se.transmode.gradle:gradle-docker:1.2')
+        classpath 'com.bmuschko:gradle-docker-plugin:2.5'
     }
 }
 
@@ -18,8 +17,19 @@ apply plugin: 'idea'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'spring-boot'
 apply plugin: 'application'
-apply plugin: 'docker'
+apply plugin: 'com.bmuschko.docker-java-application'
 
+
+import java.io.File
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerTagImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+
+version = '1.0'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -31,8 +41,6 @@ jar {
 repositories {
     jcenter()
     mavenCentral()
-    maven { url "http://repo.spring.io/snapshot" }
-    maven { url "http://repo.spring.io/milestone" }
 }
 
 dependencies {
@@ -43,14 +51,71 @@ dependencies {
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
 
-task buildDocker(type: Docker, dependsOn: build) {
-  push = false
-  dockerfile = file('src/main/docker/Dockerfile')
-  applicationName = jar.baseName
-  doFirst {
-    copy {
-      from jar
-      into stageDir
+
+docker {
+    if (System.env.DOCKER_HOST) {
+        url = "$System.env.DOCKER_HOST".replace("tcp","https")
+        if (System.env.DOCKER_CERT_PATH) {
+            certPath = new File(System.env.DOCKER_CERT_PATH)
+
+        }
+    } else {
+        url = 'unix:///var/run/docker.sock'
     }
-  }
 }
+
+task copyDockerFile(type: Copy) {
+    from        "$project.projectDir/src/main/docker"
+    into        "$project.buildDir"
+}
+
+task buildDocker(type: DockerBuildImage) {
+    dependsOn build
+    dependsOn copyDockerFile
+    quiet = false
+    noCache = false
+    println("------------" + project.buildDir )
+    inputDir = project.buildDir
+    tag = "dockerboot/$project.name:$project.version"
+}
+
+task tagDocker(type: DockerTagImage) {
+    dependsOn buildDocker
+    force = true
+    imageId = buildDocker.getTag()
+    tag = "$project.version"
+}
+
+//task pushDocker(type: DockerPushImage ) {
+//    dependsOn tagDocker
+//    imageName = "$registry.url/$project.name"
+//}
+
+task createDocker(type: DockerCreateContainer) {
+    dependsOn buildDocker
+    imageId = buildDocker.getTag()
+}
+
+task runDocker(type: DockerStartContainer) {
+    dependsOn createDocker
+    targetContainerId { createDocker.getContainerId() }
+}
+
+task stopDocker(type: DockerStopContainer) {
+    dependsOn createDocker
+    targetContainerId { createDocker.getContainerId() }
+}
+
+
+
+//task buildDocker(type: Docker, dependsOn: build) {
+//  push = false
+//  dockerfile = file('src/main/docker/Dockerfile')
+//  applicationName = jar.baseName
+//  doFirst {
+//    copy {
+//      from jar
+//      into stageDir
+//    }
+//  }
+// }
