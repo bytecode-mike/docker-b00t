@@ -64,31 +64,34 @@ docker {
     }
 }
 
-task copyDockerFile(type: Copy) {
-    from        "$project.projectDir/src/main/docker"
-    into        "$project.buildDir"
+task prepareDockerResources(type: Copy) {
+    from jar
+    from "$project.projectDir/src/main/docker/Dockerfile"
+    into "$project.buildDir/docker"
 }
+
+def tagValue = "dockerboot/$project.name:$project.version";
 
 task buildDocker(type: DockerBuildImage) {
     dependsOn build
-    dependsOn copyDockerFile
-    quiet = false
-    noCache = false
-    inputDir = project.buildDir
-    tag = "dockerboot/$project.name:$project.version"
+    dependsOn prepareDockerResources
+    quiet = true
+    noCache = true
+    inputDir = prepareDockerResources.destinationDir
+    tag = tagValue
 }
 
 task tagDocker(type: DockerTagImage) {
     dependsOn buildDocker
     force = true
     imageId = buildDocker.getTag()
-    tag = "$project.version"
+    tag = tagValue
 }
 
-//task pushDocker(type: DockerPushImage ) {
-//    dependsOn tagDocker
-//    imageName = "$registry.url/$project.name"
-//}
+task pushDocker(type: DockerPushImage ) {
+    dependsOn tagDocker
+    imageName = "http://localhost:15000/v1/$project.name"
+}
 
 task createDocker(type: DockerCreateContainer) {
     dependsOn buildDocker
@@ -104,17 +107,3 @@ task stopDocker(type: DockerStopContainer) {
     dependsOn createDocker
     targetContainerId { createDocker.getContainerId() }
 }
-
-
-
-//task buildDocker(type: Docker, dependsOn: build) {
-//  push = false
-//  dockerfile = file('src/main/docker/Dockerfile')
-//  applicationName = jar.baseName
-//  doFirst {
-//    copy {
-//      from jar
-//      into stageDir
-//    }
-//  }
-// }
