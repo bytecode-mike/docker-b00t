@@ -70,7 +70,7 @@ task prepareDockerResources(type: Copy) {
     into "$project.buildDir/docker"
 }
 
-def tagValue = "dockerboot/$project.name:$project.version";
+def repName="dockerboot/$project.name"
 
 task buildDocker(type: DockerBuildImage) {
     dependsOn build
@@ -78,14 +78,15 @@ task buildDocker(type: DockerBuildImage) {
     quiet = true
     noCache = true
     inputDir = prepareDockerResources.destinationDir
-    tag = tagValue
+    tag = "$repName:$project.version"
 }
 
 task tagDocker(type: DockerTagImage) {
     dependsOn buildDocker
     force = true
     imageId = buildDocker.getTag()
-    tag = tagValue
+    repository = repName
+    tag = "$project.version"
 }
 
 task pushDocker(type: DockerPushImage ) {
