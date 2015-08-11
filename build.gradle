@@ -97,6 +97,8 @@ task pushDocker(type: DockerPushImage ) {
 task createDocker(type: DockerCreateContainer) {
     dependsOn buildDocker
     imageId = buildDocker.getTag()
+	links = ['perkonsmysql:localhost']
+    containerName = "$project.name"
 }
 
 task runDocker(type: DockerStartContainer) {
