@@ -2,16 +2,19 @@
 
 This projects puts together a simple SpringBoot / AngularJS application and it publish it as Docker image.
 
-Usage
-=====
+# Prerequisite
 
-Fast forward
-------------
+
+Fist of all you need to install the Docker container, this is depending on the underling operation system,
+for mode detail about installation consider the [Docker](http://docs.docker.com/mac/started/) site.
+The interaction with Docker can be done over a command line or if you prefer you can use the [Chrome Docker](https://chrome.google.com/webstore/detail/simple-docker-ui-beta/jfaelnolkgonnjdlkfokjadedkacbnib?hl=de) extension.
+
+# Fast forward
 
 If you are one of those fast (and hopefully less furious) developers any your
 interests are only the running code here is what you need to do:
 
-### Gradle
+## Gradle
 
     gradle buildDocker
     
@@ -20,7 +23,7 @@ interests are only the running code here is what you need to do:
     docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
  
  
-### Maven
+## Maven
 
     mvn package docker:build
     
@@ -29,65 +32,123 @@ interests are only the running code here is what you need to do:
     docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
 
 
-How the things really works
----------------------------
+# How the things really working
 
-Ok, this will try to explain in detail how this application works.
+Ok, Let's explain in detail how this application works.
 
-Fist of all you need to install the Docker container, this is depending on the underling operation system,
-for mode detail about installation consider the [Docker](http://docs.docker.com/mac/started/) site.
-The interaction with Docker can be done over a command line or if you prefer you can use the [Chrome Docker](https://chrome.google.com/webstore/detail/simple-docker-ui-beta/jfaelnolkgonnjdlkfokjadedkacbnib?hl=de) extension.
 
 The application uses MySQL as storage but you don't need to install it on your machine this will be provided as Docker image.
 
 The project contains some bash scripts (located in the *.../src/main/bash*) you can use them for various docker related actions.
 
-Build and publish the docker image
-----------------------------------
+## Build and publish the docker image
 
 The project provides both Gradle and Maven support.
 
-### Gradle
+### Publish the Docker image with Gradle
 
-You can build a Docker image using the*buildDocker* gradle task. 
-The task it is related to the *build* task and it run after it so if you want to create a docker image for this project (using gradle) you need to run the following command:
 
-    gradle buildDocker
+The Gradle Docker support is provided with the [bmuschko / gradle-docker-plugin](https://github.com/bmuschko/gradle-docker-plugin).
 
-This implies that you have [gradle](https://gradle.org/) installed on your machine.
+#### Reasons for bmuschko gradle-docker-plugin
+
+Even if on the [spring boot docker tutorial](https://spring.io/guides/gs/spring-boot-docker/) uses
+the [Transmode/gradle-docker](https://github.com/Transmode/gradle-docker)
+I prefer to use the bmuschko gradle plugin because the Transmode plugin encounters
+some problems with the boot2Docker distributions. It seams that under Windows 
+the docker build process generates a lot of output to standard out or standard err,
+then it will eventually fill a buffer of the executing process and the process
+will block indefinitely while trying to write to the stream. This is a know bug#
+and it is documented [here](https://github.com/Transmode/gradle-docker/issues/37).
+
+### Build the Docker image
+
+You can build a Docker image using the *buildDocker* gradle task. 
+The task it is related to the *build* task and it run after it so if you want
+to create a docker image for this project (using gradle) you need to run the following command:
+
+    gradlew buildDocker
+
 If you run this command for the fist time then it may take a while, this because the docker will claim the required
-images from the [docker hub](https://hub.docker.com/account/signup/). 
+images from the [docker hub](https://hub.docker.com/account/signup/).
 
-#### About the gradle script
+#### About the Gradle tasks
 
-The task definition:
+Based on bmuschko gradle plugin following tasks are available:
 
-    ....
-    task buildDocker(type: Docker, dependsOn: build) {
-    ....
+* _buildDocker_ - it builds a docker image based on the current project state.
+* _tagDocker_ - it builds a docker image based on the current project state and tag it. The tag information are obtained from the underlying (gradle) project. 
+* _pushDocker_ - it builds a docker image, tag it and push it in to a Docker repository.
+* _createDocker_ - it creates a docker container based on a given (Docker) image. This tasks only creates the Docker images it does not run (start) it.
+* _runDocker_ - it creates and runs a docker container based on a given (Docker) image.
+* _stopDocker_ - it stops a docker container.
 
-take cares that to run it after the *gradle build*, the *gradle build* compiles and pack the entire project. 
+##### _buildDocker_ task
 
-The *push* flag:
+    task buildDocker(type: DockerBuildImage) {
+        dependsOn build
+        dependsOn prepareDockerResources
+        quiet = true
+        noCache = true
+        inputDir = prepareDockerResources.destinationDir
+        tag = "$repName:$project.version"
+    }
 
-    ....
-    push = false
-    ....
-    
-is used to indicate that created image can be pushed to a [docker hub](https://hub.docker.com/account/signup/) (repository).
-By default the official hub is used but you can create your own [private docker repository](https://hub.docker.com/account/signup/).  
+The _buildDocker_ Gradle task does the following :
+
+* runs the _build_ and the _prepareDockerResources_ before the Docker image is build
+* the _build_ task builds the application war file, required by the docker image
+* the _prepareDockerResources_ copies all the required resources (for the Docker image) in the proper location. The Docker images can contain only files located under a certain
+directory; this directory is named context, only files and directories in the
+context can be added during (the image) build. For more information about the 
+ consider the this [understanding context in Docker file article](http://kimh.github.io/blog/en/docker/gotchas-in-writing-dockerfile-en/#add_and_understanding_context_in_dockerfile) for more details.
+* the image name is _"dockerboot/perk0ns"_ with the tag _"1.0"_,  this information originates from gradle project.  
+
+This task does not push (publish)the Docker image, it only creates it and make it available for the local docker container.
+
+If the task run properly you must be able to see the docker new image by using the _docker images_ command, the result must be similar with the following output.
+
+    REPOSITORY           TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+    dockerboot/perk0ns   1.0                 f9ea8a2d1c4d        4 minutes ago       868.6 MB
+    mysql                5.6                 d63d4723d715        7 weeks ago         283.5 MB
+    java                 8                   99631e385332        8 weeks ago         816.3 MB
+    ubuntu               14.04               6d4946999d4f        8 weeks ago         188.3 MB
+    mysql                latest              e0db8fe06e30        9 weeks ago         283.5 MB
+
+##### _tagDocker_ task
+
+    task tagDocker(type: DockerTagImage) {
+        dependsOn buildDocker
+        force = true
+        imageId = buildDocker.getTag()
+        repository = repName
+        tag = "$project.version"
+    }
+
+It builds and tags a Docker image based on the underlying project. This task is similar with the _buildDocker_ task upper defined.
+
+##### _createDocker_ task
+
+It builds, tags and creates a Docker container based on the underlying project. If the task run properly you must be able to see the docker new image by using the _docker ps -a_ command, the result must be similar with the following output.
 
 
-The Docker file location is described with the line:
+    CONTAINER ID        IMAGE                    COMMAND                CREATED             STATUS              PORTS               NAMES
+    d9474adb7231        dockerboot/perk0ns:1.0   "java -Djava.securit   7 seconds ago                                               perk0ns
 
-    ....
-    dockerfile = file('src/main/docker/Dockerfile')
-    ....
+At this moment the container is not running, it is only created.
 
- 
-This task uses the [Transmode/gradle-docker](https://github.com/Transmode/gradle-docker) gradle plugin.
- 
-### Maven
+##### _runDocker_ task
+
+It builds, tags, creates and runs a Docker container based on the underlying project.  If the task run properly you must be able to see the docker new image by using the _docker ps -a_ command, the result must be similar with the following output. Please notice that the mysql container is also running. Consult the MySQL section for mode details about the MySQL container. 
+
+    CONTAINER ID        IMAGE                    COMMAND                CREATED             STATUS              PORTS               NAMES     
+    9a692196017a        dockerboot/perk0ns:1.0   "java -Djava.securit   11 seconds ago      Up 7 seconds                            perk0ns   
+    ab34b9600622        mysql:latest             "/entrypoint.sh mysq   3 minutes ago       Up 3 minutes        3306/tcp            perkonsmys
+
+This is the only task that you need to run in order to get a running container.
+
+
+### Publish the Docker image with Maven
 
 If you want to create a docker image for this project (using maven) you need to run the following command:
 
@@ -111,10 +172,14 @@ this is only the directory, the file is/must named *Dockerfile*.
 
 This task uses the [docker-maven-plugin/com.spotify](https://github.com/spotify/docker-maven-plugin).
 
-#### About the Docker file
+### About the Docker file
 
-Run the image
--------------
+TODO: finish this
+
+
+## Run the application in to one or more docker containers
+
+### Run the image
 
 If the image was successfully published, then the gradle/maven must provide the following output:
 
@@ -145,12 +210,12 @@ the *927846415cb2* represents the docker image id. You can see all the available
 
 This will produce a output like this one:
 
-    REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-    perk0ns-web         latest              927846415cb2        4 minutes ago       868.6 MB
-    mysql               5.6                 d63d4723d715        2 weeks ago         283.5 MB
-    java                8                   99631e385332        2 weeks ago         816.3 MB
-    ubuntu              14.04               6d4946999d4f        2 weeks ago         188.3 MB
-    mysql               latest              e0db8fe06e30        4 weeks ago         283.5 MB
+REPOSITORY           TAG                 IMAGE ID            CREATED             VIRTUAL SIZE                                                                                                        
+dockerboot/perk0ns   1.0                 8ee496891e94        18 seconds ago      868.6 MB                                                                                                            
+mysql                5.6                 d63d4723d715        7 weeks ago         283.5 MB                                                                                                            
+java                 8                   99631e385332        8 weeks ago         816.3 MB                                                                                                            
+ubuntu               14.04               6d4946999d4f        8 weeks ago         188.3 MB                                                                                                            
+mysql                latest              e0db8fe06e30        9 weeks ago         283.5 MB
 
 As you can see the *perk0ns-web* is present in the fist position. The image has a unique id (927846415cb2)
 and a human readable name, if the name is not provided then a new name will be generated.
@@ -200,8 +265,7 @@ The configuration is located in *.../resources/db/migration/V1_init.sql*.
 
 As alternative to the command line you can use the bash script named *start-myapp.bash* located in the *.../src/main/bash* directory.
 
-Scripts
--------
+# Scripts
 
 The directory *.../src/main/bash* contains a set of useful scripts:
  
