@@ -30,16 +30,12 @@ interests are only the running code here is what you need to do:
     docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
     
     docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
-
+intract
 
 # How the things really working
 
-Ok, Let's explain in detail how this application works.
-
-
-The application uses MySQL as storage but you don't need to install it on your machine this will be provided as Docker image.
-
-The project contains some bash scripts (located in the *.../src/main/bash*) you can use them for various docker related actions.
+The application is simple, a spring JpaRepository exposes its CRULD functionality over a REST controller, an AngularJS based user interface provides user interaction; but this is nothing new, this is the state of the art.
+The element of new is introduced with the Docker, each part (the application and the database) runs in isolated in Docker containers, the containers can communicate with each other. This is a primitive form of [PaaS](https://en.wikipedia.org/wiki/Platform_as_a_service).    
 
 ## Build and publish the docker image
 
@@ -47,41 +43,34 @@ The project provides both Gradle and Maven support.
 
 ### Publish the Docker image with Gradle
 
-
 The Gradle Docker support is provided with the [bmuschko / gradle-docker-plugin](https://github.com/bmuschko/gradle-docker-plugin).
 
 #### Reasons for bmuschko gradle-docker-plugin
 
-Even if on the [spring boot docker tutorial](https://spring.io/guides/gs/spring-boot-docker/) uses
-the [Transmode/gradle-docker](https://github.com/Transmode/gradle-docker)
-I prefer to use the bmuschko gradle plugin because the Transmode plugin encounters
-some problems with the boot2Docker distributions. It seams that under Windows 
-the docker build process generates a lot of output to standard out or standard err,
-then it will eventually fill a buffer of the executing process and the process
-will block indefinitely while trying to write to the stream. This is a know bug#
-and it is documented [here](https://github.com/Transmode/gradle-docker/issues/37).
+Even if on the [spring boot docker tutorial](https://spring.io/guides/gs/spring-boot-docker/) uses the [Transmode/gradle-docker](https://github.com/Transmode/gradle-docker) I prefer to use the bmuschko gradle plugin because the _Transmode_ plugin encounters
+some problems with the boot2Docker distributions. It seams that under Windows the docker build process generates a lot of output to standard out or standard err, then it will eventually fill a buffer of the executing process and the process will block indefinitely while trying to write to the stream. This is a know bug and it is documented [here](https://github.com/Transmode/gradle-docker/issues/37).
 
 ### Build the Docker image
 
-You can build a Docker image using the *buildDocker* gradle task. 
-The task it is related to the *build* task and it run after it so if you want
+You can build a Docker image using the *buildDocker* task. The task it is related to the *build* task and it run after it so if you want
 to create a docker image for this project (using gradle) you need to run the following command:
 
     gradlew buildDocker
 
-If you run this command for the fist time then it may take a while, this because the docker will claim the required
-images from the [docker hub](https://hub.docker.com/account/signup/).
+If you run this command for the fist time then it may take a while, this because the docker will claim the required images from the [docker hub](https://hub.docker.com/account/signuintractp/).
 
 #### About the Gradle tasks
 
-Based on bmuschko gradle plugin following tasks are available:
+Following tasks are available:
 
 * _buildDocker_ - it builds a docker image based on the current project state.
 * _tagDocker_ - it builds a docker image based on the current project state and tag it. The tag information are obtained from the underlying (gradle) project. 
-* _pushDocker_ - it builds a docker image, tag it and push it in to a Docker repository.
-* _createDocker_ - it creates a docker container based on a given (Docker) image. This tasks only creates the Docker images it does not run (start) it.
-* _runDocker_ - it creates and runs a docker container based on a given (Docker) image.
+* _pushDocker_ - it builds a docker image, tag it and push it in to a Docker repository. A Docker Repository is required, consider this [article](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-ubuntu-14-04) for more details.
+* _createDocker_ - it creates a docker container based on the (Docker) image originated from the above defined tasks. This tasks only __creates__ the Docker images __it does not run (start) it__.
+* _runDocker_ - it creates and runs a docker container based on a given (Docker) image. 
 * _stopDocker_ - it stops a docker container.
+
+Consults the next sections for more details related with the above listed gradle tasks.  
 
 ##### _buildDocker_ task
 
@@ -102,9 +91,9 @@ The _buildDocker_ Gradle task does the following :
 directory; this directory is named context, only files and directories in the
 context can be added during (the image) build. For more information about the 
  consider the this [understanding context in Docker file article](http://kimh.github.io/blog/en/docker/gotchas-in-writing-dockerfile-en/#add_and_understanding_context_in_dockerfile) for more details.
-* the image name is _"dockerboot/perk0ns"_ with the tag _"1.0"_,  this information originates from gradle project.  
+* the image name is _"dockerboot/perk0ns"_ with the tag _"1.0"_,  this information originates from gradle project. Consult [this article](https://docs.docker.com/userguide/dockerimages/) for more details related to the docker image name and tag.
 
-This task does not push (publish)the Docker image, it only creates it and make it available for the local docker container.
+This task __does not push (publish)__the Docker image, it only creates it and make it available for the local docker container.
 
 If the task run properly you must be able to see the docker new image by using the _docker images_ command, the result must be similar with the following output.
 
