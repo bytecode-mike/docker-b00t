@@ -59,4 +59,4 @@ local.properties
 #intelij
 .idea
 *.iml
-build
+build/build/
