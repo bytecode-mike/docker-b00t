@@ -276,4 +276,3 @@ The directory *.../src/main/bash* contains a set of useful scripts:
 
 If you start the container with the upper described scripts you will associate them with a name, the name is unique,
 so you can not run the scripts twice. In order to re-run the scripts you need to purge the containers ( *purge-all-containers.bash* )
- 
