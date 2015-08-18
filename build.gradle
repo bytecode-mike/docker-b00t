@@ -14,14 +14,11 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'eclipse-wtp'
+apply plugin: 'eclipse'
 apply plugin: 'spring-boot'
 apply plugin: 'application'
 apply plugin: 'com.bmuschko.docker-java-application'
 
-
-import java.io.File
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerTagImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
@@ -56,8 +53,7 @@ docker {
     if (System.env.DOCKER_HOST) {
         url = "$System.env.DOCKER_HOST".replace("tcp","https")
         if (System.env.DOCKER_CERT_PATH) {
-            certPath = new File(System.env.DOCKER_CERT_PATH)
-
+            certPath = new java.io.File(System.env.DOCKER_CERT_PATH)
         }
     } else {
         url = 'unix:///var/run/docker.sock'
@@ -75,7 +71,7 @@ def repName="dockerboot/$project.name"
 task buildDocker(type: DockerBuildImage) {
     dependsOn build
     dependsOn prepareDockerResources
-    quiet = true
+    quiet = false
     noCache = true
     inputDir = prepareDockerResources.destinationDir
     tag = "$repName:$project.version"
@@ -97,7 +93,9 @@ task pushDocker(type: DockerPushImage ) {
 task createDocker(type: DockerCreateContainer) {
     dependsOn buildDocker
     imageId = buildDocker.getTag()
-	links = ['perkonsmysql:localhost']
+    links = ['perkonsmysql:localhost']
+    exposedPorts =["tcp":8080]
+    portBindings = '8080:8080'
     containerName = "$project.name"
 }
 
