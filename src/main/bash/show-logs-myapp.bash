@@ -1,4 +1,4 @@
 #!/bin/bash
 #set -xv
 
-docker logs perk0nswebapp
+docker logs perk0ns
