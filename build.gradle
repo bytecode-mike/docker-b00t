@@ -22,6 +22,7 @@ apply plugin: 'com.bmuschko.docker-java-application'
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerTagImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.image.DockerListImages
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
@@ -99,7 +100,7 @@ task createDocker(type: DockerCreateContainer) {
     containerName = "$project.name"
 }
 
-task runDocker(type: DockerStartContainer) {
+task startDocker(type: DockerStartContainer) {
     dependsOn createDocker
     targetContainerId { createDocker.getContainerId() }
 }
@@ -108,3 +109,17 @@ task stopDocker(type: DockerStopContainer) {
     dependsOn createDocker
     targetContainerId { createDocker.getContainerId() }
 }
+
+task startMySQLDocker(type: DockerStartContainer) {
+//TODO: still not ready
+}
+
+task stopMySQLDocker(type: DockerStopContainer) {
+//TODO: still not ready
+}
+
+task getMySQLId(type: DockerListImages) {
+
+}
+
+
