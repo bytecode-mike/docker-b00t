@@ -118,7 +118,7 @@ It builds and tags a Docker image based on the underlying project. This task is 
         containerName = "$project.name"
     }
 
-This task builds, tags and creates a Docker container based on the underlying project. At this point you need to be familiar with two docker terms: [image](https://docs.docker.com/userguide/dockerimages/) and [container](https://www.docker.com/whatisdocker); the _image_ is just a template and it does not run, when a _image_ runs it always run as a _container_.
+This task builds, tags and creates a Docker container based on the underlying project. At this point you need to be familiar with two docker terms: [image](https://docs.docker.com/userguide/dockerimages/) and [container](https://www.docker.com/whatisdocker); the _image_ is just a template and it does not run, when an _image_ runs it always run as a _container_.
 
 This task __does not runs__ the docker container it only create it, in order to run it you need to consider the _startDocker_ task (below described).
 This task depends on the _buildDocker_ task because it requires a valid docker image in order to to run a docker container. 
