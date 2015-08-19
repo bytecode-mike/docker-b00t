@@ -182,11 +182,6 @@ this is only the directory, the file is/must named *Dockerfile*.
 
 This task uses the [docker-maven-plugin/com.spotify](https://github.com/spotify/docker-maven-plugin).
 
-## About the Docker file
-
-TODO: finish this
-
-
 ### Run the image
 
 If the image was successfully published, then the gradle/maven must provide the following output:
