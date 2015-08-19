@@ -131,7 +131,7 @@ Under this circumstances (docker link), you __need to have a running MySQL insta
 
 Usually the docker containers are running isolated, our application is a web based application and it must be accessible so we need to create a container that expose to _8080_ port. If this (exposedPorts, portBindings) information is omitted then the container will be still running but no it will be not accessible.
 
-If the task run properly you must be able to see the docker new image by using the _docker ps -a_ command, the result must be similar with the following output.
+If the task run properly you must be able to see the new docker container by using the _docker ps -a_ command, the result must be similar with the following output.
 
     gradlew createDocker
     
@@ -144,7 +144,7 @@ At this moment the container is not running, it is only created.
 
 ##### _startDocker_ task
 
-It builds, tags, creates and runs a Docker container based on the underlying project.  If the task run properly you must be able to see the docker new image by using the _docker ps -a_ command, the result must be similar with the following output. 
+It builds, tags, creates and runs a Docker container based on the underlying project.  If the task run properly you must be able to see the new docker container by using the _docker ps -a_ command, the result must be similar with the following output.
 
     gradlew startDocker
     
