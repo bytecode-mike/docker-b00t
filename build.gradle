@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath 'com.bmuschko:gradle-docker-plugin:2.5'
     }
 }
@@ -67,7 +67,10 @@ task prepareDockerResources(type: Copy) {
     into "$project.buildDir/docker"
 }
 
-def repName="dockerboot/$project.name"
+// docker tag [OPTIONS] IMAGE[:TAG] [REGISTRYHOST/][USERNAME/]NAME[:TAG]
+
+def repName="localhost:5000/$project.name"
+def tagName="$repName:$project.version"
 
 task buildDocker(type: DockerBuildImage) {
     dependsOn build
@@ -75,7 +78,7 @@ task buildDocker(type: DockerBuildImage) {
     quiet = false
     noCache = true
     inputDir = prepareDockerResources.destinationDir
-    tag = "$repName:$project.version"
+    tag = tagName
 }
 
 task tagDocker(type: DockerTagImage) {
@@ -83,12 +86,14 @@ task tagDocker(type: DockerTagImage) {
     force = true
     imageId = buildDocker.getTag()
     repository = repName
-    tag = "$project.version"
+    tag = "latest"
 }
 
 task pushDocker(type: DockerPushImage ) {
     dependsOn tagDocker
-    imageName = "http://localhost:15000/v1/$project.name"
+    imageName = repName
+    // optional
+    tag = project.version
 }
 
 task createDocker(type: DockerCreateContainer) {
@@ -97,7 +102,7 @@ task createDocker(type: DockerCreateContainer) {
     links = ['perkonsmysql:localhost']
     exposedPorts =["tcp":8080]
     portBindings = '8080:8080'
-    containerName = "$project.name"
+    containerName = "$project.name-$project.version"
 }
 
 task startDocker(type: DockerStartContainer) {
@@ -121,5 +126,3 @@ task stopMySQLDocker(type: DockerStopContainer) {
 task getMySQLId(type: DockerListImages) {
 
 }
-
-
