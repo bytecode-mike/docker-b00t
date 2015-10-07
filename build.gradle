@@ -101,7 +101,7 @@ task createDocker(type: DockerCreateContainer) {
     imageId = buildDocker.getTag()
     links = ['perkonsmysql:localhost']
     exposedPorts =["tcp":8080]
-    portBindings = '8080:8080'
+    portBindings = '80:8080'
     containerName = "$project.name-$project.version"
 }
 

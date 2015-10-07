@@ -1,9 +1,9 @@
 # docker-b00t
 
 This projects puts together a simple SpringBoot / AngularJS application and it publish it as Docker image.
+This is not a Spring Boot or Angular JS tutorial, the focus is on the Docker and on the possible way to use it (together with  a SpringBoot/ AngularJS/MySQL database).  
 
 # Prerequisite
-
 
 Fist of all you need to install the Docker container, this is depending on the underling operation system,
 for mode detail about installation consider the [Docker](http://docs.docker.com/mac/started/) site.
@@ -17,24 +17,58 @@ If you are one of those fast (and I hope less furious) developers any your inter
 
     gradle buildDocker
     
-    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+    docker run --name perkonsmysql \
+               -e MYSQL_USER=perkon \
+               -e MYSQL_PASSWORD=perkon \
+               -e MYSQL_DATABASE=perkons_db \
+               -e MYSQL_ROOT_PASSWORD=root \
+               -d \
+               -p 3306:3306 \
+               mysql:latest
     
-    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
- 
+    docker run --name perk0ns \
+               --link perkonsmysql:localhost \
+               -d \
+               -p 80:8080 \
+               localhost:5000/perk0ns:1.0
+ or
+
+    docker run --name perkonsmysql \
+               -e MYSQL_USER=perkon \
+               -e MYSQL_PASSWORD=perkon \
+               -e MYSQL_DATABASE=perkons_db \
+               -e MYSQL_ROOT_PASSWORD=root \
+               -d \
+               -p 3306:3306 \
+               mysql:latest
+
+    gradle clean startDocker
  
 ## Maven
 
     mvn package docker:build
     
-    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
+    docker run --name perkonsmysql \
+               -e MYSQL_USER=perkon \
+               -e MYSQL_PASSWORD=perkon \
+               -e MYSQL_DATABASE=perkons_db \
+               -e MYSQL_ROOT_PASSWORD=root \
+               -d \
+               -p 3306:3306 \
+               mysql:latest
     
-    docker run --name perkonsmysql -e MYSQL_USER=perkon -e MYSQL_PASSWORD=perkon -e MYSQL_DATABASE=perkons_db -e MYSQL_ROOT_PASSWORD=root -d mysql:latest
-intract
+    docker run --name perk0ns \
+               --link perkonsmysql:localhost \
+               -d \
+               -p 80:8080 \
+               localhost:5000/perk0ns:1.0
 
-# How the things really working
+# How the things really working ?
 
-The application is simple, a spring JpaRepository exposes its CRULD functionality over a REST controller, an AngularJS based user interface provides user interaction; but this is nothing new, this is the state of the art.
+The application is simple; a spring JpaRepository exposes its CRULD functionality over a REST controller, an AngularJS based user interface provides user interaction; but this is nothing new, this is the state of the art.
 The element of new is introduced with the Docker, each part (the application and the database) runs in isolated in Docker containers, the containers can communicate with each other. This is a primitive form of [PaaS](https://en.wikipedia.org/wiki/Platform_as_a_service).    
+The proposed workflow is simple: the developer(s) create code; the code is packed in to a __application__, the application is encapsulated in to a __Docker image__ (together with all the required resources); the Docker image gets __tag__ and after this it is __pushed__ in to a docker registry. 
+This project uses a local docker registry, more details in the sections below.
 
 ## Build and publish the Docker image
 
@@ -78,22 +112,26 @@ The _buildDocker_ Gradle task does the following :
 * runs the _build_ and the _prepareDockerResources_ before the Docker image is build
 * the _build_ task builds the application war file, required by the docker image
 * the _prepareDockerResources_ task copies all the required resources (for the Docker image) in the proper location. The Docker images can contain only files located under a certain directory; this directory is named context, only files and directories in the context can be added during (the image) build. For more information about the Docker context consider the [understanding context in Docker file](http://kimh.github.io/blog/en/docker/gotchas-in-writing-dockerfile-en/#add_and_understanding_context_in_dockerfile)  article.
-* the image name is _"dockerboot/perk0ns"_ with the tag _"1.0"_,  this information originates from gradle project. Consult [this article](https://docs.docker.com/userguide/dockerimages/) for more details related to the docker image name and tag.
+* the new created image is tagged with a tag with the following syntax 'REPOSITORY/PROJECT:VERSION'. The tag syntax corresponds the [Docker needs](). The REPOSITORY is the URL for the docker repository where the image will be published, at this stage the image is still not published. 
+* the image name is _"localhost:5000/perk0ns"_ with the tag _"1.0"_,  this information originates from gradle project. Consult [this article](https://docs.docker.com/userguide/dockerimages/) for more details related to the docker image name and tag.
 
 This task __does not push (publish)__ the Docker image, it only creates it and make it available for the local docker container.
 
 If the task run properly you must be able to see the docker new image by using the _docker images_ command, the result must be similar with the following output.
 
     gradlew buildDocker
-
+    
     docker images
 
-    REPOSITORY           TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-    dockerboot/perk0ns   1.0                 f9ea8a2d1c4d        4 minutes ago       868.6 MB
-    mysql                5.6                 d63d4723d715        7 weeks ago         283.5 MB
-    java                 8                   99631e385332        8 weeks ago         816.3 MB
-    ubuntu               14.04               6d4946999d4f        8 weeks ago         188.3 MB
-    mysql                latest              e0db8fe06e30        9 weeks ago         283.5 MB
+    REPOSITORY               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+    localhost:5000/perk0ns   1.0                 9e8cfe28fe93        37 hours ago        868.7 MB
+    python                   latest              575cb3ad9b67        3 weeks ago         685.7 MB
+    registry                 2                   2f1ef7702586        7 weeks ago         220.6 MB
+    mysql                    latest              c45e4ba02f47        7 weeks ago         283.8 MB
+    java                     8                   49ebfec495e1        11 weeks ago        816.4 MB
+
+
+The _buildDocker_ only builds the _localhost:5000/perk0ns_ image. The rest of the images are just images that exist only on my local machine.
 
 ##### _tagDocker_ task
 
@@ -102,10 +140,38 @@ If the task run properly you must be able to see the docker new image by using t
         force = true
         imageId = buildDocker.getTag()
         repository = repName
-        tag = "$project.version"
+        tag = "latest"
     }
 
-It builds and tags a Docker image based on the underlying project. This task is similar with the _buildDocker_ task upper defined.
+It builds and tags with the tag _latest_ a Docker image based on the underlying project. This task is similar with the _buildDocker_ task above defined, the only difference is that the tag name is in this case _latest_. 
+If this task runs you will be able to see two different tags for your image (same image id but different tags), a _1.0_ (the actual project version) and a _latest_ tag. The _latest_ tag is a Docker convention, it is assigned to the image that corresponds to the latest project (image) version. The _latest_ tag is a Docker convention, if you try to run/pull an image without to specify the version information then the image tagged with _latest_ will be chosen. 
+
+##### _pushDocker_ task
+
+    task pushDocker(type: DockerPushImage ) {
+        dependsOn tagDocker
+        imageName = repName
+        tag = project.version
+    }
+
+It builds, tags  with _latest_ and push the new created image into docker hub registry that runs local. This task __requires a docker hub repository__; for test purposes you can use the default file system based docker registry named _registry_ :). To run it you need the following command:
+
+    docker run -d -p 5000:5000 --restart=always --name registry registry:2
+
+or run the _start-local-registry.bash_ script located in the _.../src/main/bash_ directory. Please notice that this (docker) repository has only didactic purposes and it __does not provide the docker search__ function; the consequence, you can not the command _docker search localhost:5000/p_ against this repository.
+If this task run properly you can pull now the new created image from the registry. In order to to this use the following command:
+
+    docker pull localhost:5000/perk0ns:1.0
+ 
+Eventually you need to remove the previous image, if this is still available on your local machine. In order to to this use the following command:
+ 
+    docker rmi -f localhost:5000/perk0ns:1.0
+    
+You can browse the file based repository by using the the following command:
+
+    docker run -d -p 5000:5000 --restart=always --name registry registry:2 
+
+or run the _connect-to-local-registry.bash_ script located in the _.../src/main/bash_ directory. If this script runs properly you will be log in the _docker container_ that host the docker repository. Go on _/var/lib/registry/docker/registry/v2/repositories_ and you will be able to see your image, or at least the way how docker store it.
 
 ##### _createDocker_ task
 
@@ -114,8 +180,8 @@ It builds and tags a Docker image based on the underlying project. This task is 
         imageId = buildDocker.getTag()
         links = ['perkonsmysql:localhost']
         exposedPorts =["tcp":8080]
-        portBindings = '8080:8080'
-        containerName = "$project.name"
+        portBindings = '80:8080'
+        containerName = "$project.name-$project.version"
     }
 
 This task builds, tags and creates a Docker container based on the underlying project. At this point you need to be familiar with two docker terms: [image](https://docs.docker.com/userguide/dockerimages/) and [container](https://www.docker.com/whatisdocker); the _image_ is just a template and it does not run, when an _image_ runs it always run as a _container_.
@@ -182,50 +248,6 @@ this is only the directory, the file is/must named *Dockerfile*.
 
 This task uses the [docker-maven-plugin/com.spotify](https://github.com/spotify/docker-maven-plugin).
 
-### Run the image
-
-If the image was successfully published, then the gradle/maven must provide the following output:
-
-    Sending build context to Docker daemon 26.16 MB
-    Sending build context to Docker daemon 
-    Step 0 : FROM java:8
-     ---> 99631e385332
-    Step 1 : VOLUME /tmp
-     ---> Running in 8afe0c54416b
-     ---> 70edf8fa107c
-    Removing intermediate container 8afe0c54416b
-    Step 2 : ADD perk0ns-web-0.0.1-SNAPSHOT.jar app.jar
-     ---> cbe130d9b835
-    Removing intermediate container 07c8ccd63a3c
-    Step 3 : RUN bash -c 'touch /app.jar'
-     ---> Running in d355e7e6ee12
-     ---> ebe0ec88811b
-    Removing intermediate container d355e7e6ee12
-    Step 4 : ENTRYPOINT java -Djava.security.egd=file:/dev/./urandom -jar /app.jar
-     ---> Running in 3b81c76401f3
-     ---> 927846415cb2
-    Removing intermediate container 3b81c76401f3
-    Successfully built 927846415cb2
-
-the *927846415cb2* represents the docker image id. You can see all the available images by running the following command:
-    
-    docker images
-
-This will produce a output like this one:
-
-    REPOSITORY           TAG                 IMAGE ID            CREATED             VIRTUAL SIZE                                                                                                        
-    dockerboot/perk0ns   1.0                 8ee496891e94        18 seconds ago      868.6 MB                                                                                                            
-    mysql                5.6                 d63d4723d715        7 weeks ago         283.5 MB                                                                                                            
-    java                 8                   99631e385332        8 weeks ago         816.3 MB                                                                                                            
-    ubuntu               14.04               6d4946999d4f        8 weeks ago         188.3 MB                                                                                                            
-    mysql                latest              e0db8fe06e30        9 weeks ago         283.5 MB
-
-As you can see the *perk0ns-web* is present in the fist position. The image has a unique id (927846415cb2)
-and a human readable name, if the name is not provided then a new name will be generated.
-You can delete any imaged with :
-  
-    docker rmi <image name> / <ID>
-
 ##Command Line support
 
 ###Start MySQL in to a Docker container
@@ -248,18 +270,22 @@ The actual application requires a database so you __must__ to start the MySQL da
 ####The Database content
 
 The database content is added via via [flyway](http://flywaydb.org/). The configuration is located in *.../resources/db/migration/V1_init.sql*.
+I chose to use flyway because for is the default data migation solution for spring boot based applications.  
+
 
 ### Start Application
 
-Before you can run the application you need __to have a running MySQL instance__ under the name _perkonsmysql_; consult the _Start MySQL in to a Docker container_ section for mode details about the MySQL container.
+Before you can run the application you need :
+* to have a running MySQL docker container__ under the name _perkonsmysql; consult the _Start MySQL in to a Docker container_ section for mode details about the MySQL container.
+* to have a docker image (for this application) on the local machine under the name _localhost:5000/perk0ns_ with the tag _1.0_. Consult the section above for more details.  
 
-You can start the application by using the following command:
+You can start the application (run the docker image in to a container) by using the following command:
 
     docker run --name perk0ns \
                --link perkonsmysql:localhost \
                -d \
-               -p 8080:8080 \
-               dockerboot/perk0ns:1.0
+               -p 80:8080 \
+               localhost:5000/perk0ns:1.0
 
 This command will start the application (as a daemon) and [link](https://docs.docker.com/userguide/dockerlinks/) it to other docker container named _perkonsmysql_ under the alias *localhost*.
 
@@ -268,10 +294,21 @@ Each verse is stored as a entry in the database, you can add or remove them as y
 
 As alternative to the command line you can use the bash script named *start-myapp.bash* located in the *.../src/main/bash* directory.
 
+### NodeJS an dBower
+
+The front-end uses [Node.js](https://nodejs.org) and [bower](http://bower.io/) to claim the java-script related resources. 
+The javascript resources required in the user interface are declared in the _bower.json_ file.
+This resources are claimed from the remote repositories and stored in the directory .../static/bower_components, the bower is instructed to do this with the file .bower.json. You can use  "bower update" command if you want to update the javascript dependencies.
+The the directory .../static/bower_components contains already all the requires resources, so the "bower update" command is optional.
+
+
+  
+
 # Scripts
 
 The directory *.../src/main/bash* contains a set of useful scripts:
- 
+
+* connet-to-local-repository.bash - it connect to the file-based docker registry. Use it to inspect the way how the docker images get stored in a repository. The image is located on _/var/lib/registry/docker/registry/v2/repositories_.  
 * connet-to-mysql.bash - it connects to the MySQL running docker container. Use it to login in to the MySQl container, you can use the [mysql cli](https://dev.mysql.com/doc/refman/5.5/en/mysql.html) to inspect the database content.
 * connet-to-mywebapp.bash - it connects to the docker image that run the webapp.
 * purge-all-containers.bash - will stop and remove all the running docker containers.
