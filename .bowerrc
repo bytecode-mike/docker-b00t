@@ -1,0 +1,5 @@
+{
+  "directory": "src/main/resources/static/bower_components",
+  "analytics": false,
+  "timeout": 120000
+}
