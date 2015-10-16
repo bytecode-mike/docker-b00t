@@ -272,6 +272,17 @@ The actual application requires a database so you __must__ to start the MySQL da
 The database content is added via via [flyway](http://flywaydb.org/). The configuration is located in *.../resources/db/migration/V1_init.sql*.
 I chose to use flyway because for is the default data migation solution for spring boot based applications.  
 
+##Java OPTS
+
+As of the most java application this docker container can be customized with the __JAVA_OPTS__ environment variable.
+All the spring boot configuration (provided with the _application.properties_) can be overridden in this way. By example
+if you wont to specify an other _URL_ for the database you need to use something like this:
+
+    docker run --name perk0ns \
+               -e JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://localhost:3306/perkons_db" \
+               -d \
+               -p 80:8080 \
+               localhost:5000/perk0ns:1.0
 
 ### Start Application
 
@@ -294,15 +305,12 @@ Each verse is stored as a entry in the database, you can add or remove them as y
 
 As alternative to the command line you can use the bash script named *start-myapp.bash* located in the *.../src/main/bash* directory.
 
-### NodeJS an dBower
+### NodeJS and Bower
 
 The front-end uses [Node.js](https://nodejs.org) and [bower](http://bower.io/) to claim the java-script related resources. 
 The javascript resources required in the user interface are declared in the _bower.json_ file.
 This resources are claimed from the remote repositories and stored in the directory .../static/bower_components, the bower is instructed to do this with the file .bower.json. You can use  "bower update" command if you want to update the javascript dependencies.
 The the directory .../static/bower_components contains already all the requires resources, so the "bower update" command is optional.
-
-
-  
 
 # Scripts
 
