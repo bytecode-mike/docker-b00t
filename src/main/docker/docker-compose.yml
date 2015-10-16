@@ -1,0 +1,14 @@
+db:
+  image: mysql
+  environment:
+    - MYSQL_USER=perkon
+    - MYSQL_PASSWORD=perkon 
+    - MYSQL_DATABASE=perkons_db
+    - MYSQL_ROOT_PASSWORD=root
+
+web:
+  image: localhost:5000/perk0ns:1.0
+  ports:
+    - "80:8080"
+  links:
+    - db:localhost
