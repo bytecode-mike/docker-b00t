@@ -317,6 +317,15 @@ everything at once with a single command, you can do this by using the [docker-c
 
 The above mentioned command must be call in the project root. A script that does something similar is available in the _.../bash_ directory under the name _start-all-docker-compose.bash_
 
+#### Start the application and database at once / docker-compose
+
+Until now the we start the application and the database separately. This is not always wished, sometime is required start
+everything at once with a single command, you can do this by using the [docker-compose](https://docs.docker.com/compose/) command with the docker-compose.yml file as in the next example.
+ 
+    docker-compose -f src/docker/docker-compose.yml up
+
+The above mentioned command must be call in the project root. A script that does something similar is available in the _.../bash_ directory under the name _start-all-docker-compose.bash_
+
 ### NodeJS and Bower
 
 The front-end uses [Node.js](https://nodejs.org) and [bower](http://bower.io/) to claim the java-script related resources. 
