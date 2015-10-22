@@ -225,6 +225,7 @@ This is the only task that you need to run in order to get a running container.
 
 Now use your favorite browser on *localhost:8080* and you will be able to see the penultimate strophe from the [William Blake, The tiger](http://www.bartleby.com/101/489.html).
 Each verse is stored as a entry in the database, you can add or remove them as you wish.
+
 ### Publish the Docker image with Maven
 
 If you want to create a docker image for this project (using maven) you need to run the following command:
@@ -235,6 +236,8 @@ This implies that you have [maven](https://maven.apache.org/) installed on your 
 As in the gradle case, if you run this command for the fist time then it may take a while, this because the docker will claim the required images from the [docker hub](https://hub.docker.com/account/signup/). 
 
 This task uses the [Transmode/gradle-docker](https://github.com/Transmode/gradle-docker) gradle plugin.
+
+__The maven section is still under development__
 
 #### About the POM file
 
