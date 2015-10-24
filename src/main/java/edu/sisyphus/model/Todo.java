@@ -1,15 +1,17 @@
-package edu.perkons.model;
+package edu.sisyphus.model;
 
 import javax.persistence.*;
 
 @Entity
-public class Item {
+public class Todo {
 
     private Long id;
     private boolean checked;
     private String description;
 
-    
+    public Todo() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     public Long getId() {

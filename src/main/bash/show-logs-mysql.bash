@@ -1,4 +1,4 @@
 #!/bin/bash
 #set -xv
 
-docker logs perkonsmysql
+docker logs sys_db

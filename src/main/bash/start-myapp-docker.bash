@@ -1,8 +1,8 @@
 #!/bin/bash
 #set -xv
 
-docker run --name perk0ns \
-           --link perkonsmysql:localhost \
+docker run --name systoto \
+           --link sys_db:localhost \
            -d \
            -p 80:8080 \
-           localhost:5000/perk0ns:1.0
+           localhost:5000/systodo:1.0

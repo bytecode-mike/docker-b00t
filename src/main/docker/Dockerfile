@@ -1,6 +1,10 @@
 FROM java:8
 VOLUME /tmp
-ADD perk0ns-web-0.0.1-SNAPSHOT.jar app.jar
-RUN bash -c 'touch /app.jar'
 
-ENTRYPOINT java -Djava.security.egd=file:/dev/./urandom $JAVA_OPTS -jar app.jar
+ENV SYSTODO_HOME="/opt/systoto"
+ENV SYSTODO_JAR=$SYSTODO_HOME"/"systodo-web-0.0.1-SNAPSHOT.jar
+
+RUN mkdir -p $SYSTODO_HOME"/lib" 
+ADD systodo-web-0.0.1-SNAPSHOT.jar $SYSTODO_JAR
+
+ENTRYPOINT java -Djava.security.egd=file:/dev/./urandom $JAVA_OPTS -jar $SYSTODO_JAR

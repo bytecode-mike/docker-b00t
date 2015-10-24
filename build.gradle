@@ -32,7 +32,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 jar {
-    baseName = 'perk0ns-web'
+    baseName = 'systodo-web'
     version =  '0.0.1-SNAPSHOT'
 }
 

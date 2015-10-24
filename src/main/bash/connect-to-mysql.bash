@@ -2,4 +2,4 @@
 #set -xv
 
 
-docker exec -it perkonsmysql bash
+docker exec -it sys_db bash

@@ -1,4 +1,4 @@
-package edu.perkons;
+package edu.sisyphus;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.*;
