@@ -77,6 +77,8 @@ The project provides both Gradle and Maven support.
 ### Publish the Docker image with Gradle
 
 The Gradle Docker support is provided with the [bmuschko / gradle-docker-plugin](https://github.com/bmuschko/gradle-docker-plugin).
+If you use windows (or you use any boot2docker like environment) you need to call all the gradle commands from the
+_docker terminal_.  
 
 #### Reasons for bmuschko gradle-docker-plugin
 
