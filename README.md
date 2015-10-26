@@ -229,9 +229,7 @@ It builds, tags, creates and runs a Docker container based on the underlying pro
 
 
 This is the only task that you need to run in order to get a running container.
-
-Now use your favorite browser on *localhost:8080* and you will be able to see the penultimate strophe from the [William Blake, The tiger](http://www.bartleby.com/101/489.html).
-Each verse is stored as a entry in the database, you can add or remove them as you wish.
+Now use your favorite browser on *localhost:8080* and you will be able to see the actual set of tasks; as a entry in the database, you can add or remove them as you wish.
 
 ### Publish the Docker image with Maven
 
