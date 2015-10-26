@@ -3,6 +3,11 @@
 This projects puts together a simple SpringBoot / AngularJS application and it publish it as Docker image.
 This is not a Spring Boot or Angular JS tutorial, the focus is on the Docker and on the possible way to use it (together with  a SpringBoot/ AngularJS/MySQL database).  
 
+# The story behind
+
+[Sisyphus](https://en.wikipedia.org/wiki/Sisyphus) has a great life and a quite challenging job; with all of this he needs a way to organize his daily tasks. 
+This (small project) tries to help Mr. Sisyphus in organising his daily set of tasks.   
+
 # Prerequisite
 
 Fist of all you need to install the Docker container, this is depending on the underling operation system,
