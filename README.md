@@ -308,8 +308,8 @@ You can start the application (run the docker image in to a container) by using 
 
 This command will start the application (as a daemon) and [link](https://docs.docker.com/userguide/dockerlinks/) it to other docker container named _perkonsmysql_ under the alias *localhost*.
 
-Now use your favorite browser on *localhost:8080* and you will be able to see the penultimate strophe from the [William Blake, The tiger](http://www.bartleby.com/101/489.html).
-Each verse is stored as a entry in the database, you can add or remove them as you wish.
+Now use your favorite browser on *localhost:8080* and you will be able to see the sisyphus tot list.
+Each task is stored as a entry in the database, you can add or remove them as you wish.
 
 As alternative to the command line you can use the bash script named *start-myapp.bash* located in the *.../src/main/bash* directory.
 
