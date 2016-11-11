@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.2.5.RELEASE'
+        springBootVersion = '1.4.1.RELEASE'
     }
     repositories {
         jcenter()
@@ -27,13 +27,13 @@ import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
 
-version = '1.0'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+version = '0.0.1-SNAPSHOT'
+
 jar {
-    baseName = 'systodo-web'
-    version =  '0.0.1-SNAPSHOT'
+    baseName = "$project.name"
 }
 
 repositories {
@@ -42,13 +42,12 @@ repositories {
 }
 
 dependencies {
- compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.flywaydb:flyway-core")
     runtime("mysql:mysql-connector-java")
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
-
 
 docker {
     if (System.env.DOCKER_HOST) {
@@ -62,8 +61,9 @@ docker {
 }
 
 task prepareDockerResources(type: Copy) {
-    from jar
-    from "$project.projectDir/src/main/docker/Dockerfile"
+    from ("$project.projectDir/src/main/docker/Dockerfile") {
+        filter{ it.replaceAll('@@jarfile@@', "$jar.baseName" + "$project.version" + '.jar')}
+    }
     into "$project.buildDir/docker"
 }
 
@@ -72,7 +72,7 @@ task prepareDockerResources(type: Copy) {
 def repName="localhost:5000/$project.name"
 def tagName="$repName:$project.version"
 
-task buildDocker(type: DockerBuildImage) {
+task buildDocImage(type: DockerBuildImage) {
     dependsOn build
     dependsOn prepareDockerResources
     quiet = false
@@ -81,37 +81,37 @@ task buildDocker(type: DockerBuildImage) {
     tag = tagName
 }
 
-task tagDocker(type: DockerTagImage) {
-    dependsOn buildDocker
+task tagDocImage(type: DockerTagImage) {
+    dependsOn buildDocImage
     force = true
-    imageId = buildDocker.getTag()
+    imageId = buildDocImage.getTag()
     repository = repName
     tag = "latest"
 }
 
-task pushDocker(type: DockerPushImage ) {
-    dependsOn tagDocker
+task pushDocImage(type: DockerPushImage ) {
+    dependsOn tagDocImage
     imageName = repName
     // optional
     tag = project.version
 }
 
-task createDocker(type: DockerCreateContainer) {
-    dependsOn buildDocker
-    imageId = buildDocker.getTag()
+task createDocContainer(type: DockerCreateContainer) {
+    dependsOn buildDocImage
+    imageId = buildDocImage.getTag()
     links = ['perkonsmysql:localhost']
     exposedPorts =["tcp":8080]
     portBindings = '80:8080'
     containerName = "$project.name-$project.version"
 }
 
-task startDocker(type: DockerStartContainer) {
-    dependsOn createDocker
+task startDocContainer(type: DockerStartContainer) {
+    dependsOn createDocContainer
     targetContainerId { createDocker.getContainerId() }
 }
 
-task stopDocker(type: DockerStopContainer) {
-    dependsOn createDocker
+task stopDocContainer(type: DockerStopContainer) {
+    dependsOn createDocContainer
     targetContainerId { createDocker.getContainerId() }
 }
 
