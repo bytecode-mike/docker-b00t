@@ -20,7 +20,9 @@ If you are one of those fast (and I hope less furious) developers any your inter
 
 ## Gradle
 
-    gradle buildDocker
+The newest gradle version (3.x) is recommended.
+
+    gradle tagDocImage
     
     docker run --name perkonsmysql \
                -e MYSQL_USER=perkon \
@@ -94,12 +96,12 @@ some problems with the boot2Docker distributions. It seams that under Windows th
 
 Following tasks are available:
 
-* _buildDocker_ - it builds a docker image based on the current project state.
-* _tagDocker_ - it builds a docker image based on the current project state and tag it. The tag information are obtained from the underlying (gradle) project. 
-* _pushDocker_ - it builds a docker image, tag it and push it in to a Docker repository. A Docker Repository is required, consider this [article](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-ubuntu-14-04) for more details.
-* _createDocker_ - it creates a docker container based on the (Docker) image originated from the above defined tasks. This task only __creates__ the Docker container __it does not run (start) it__.
-* _startDocker_ - it creates and runs a docker container based on a given (Docker) image. 
-* _stopDocker_ - it stops a docker container.
+* _buildDocImage_ - it builds a docker image based on the current project state.
+* _tagDocDocImage_ - it builds a docker image based on the current project state and tag it. The tag information are obtained from the underlying (gradle) project. 
+* _pushDocImage_ - it builds a docker image, tag it and push it in to a Docker repository. A Docker Repository is required, consider this [article](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-ubuntu-14-04) for more details.
+* _createDocImage_ - it creates a docker container based on the (Docker) image originated from the above defined tasks. This task only __creates__ the Docker container __it does not run (start) it__.
+* _startDocContainer_ - it creates and runs a docker container based on a given (Docker) image. 
+* _stopDocContainer_ - it stops a docker container.
 
 Consults the next sections for more details related with the above listed (gradle) tasks.  
 
@@ -114,11 +116,12 @@ Consults the next sections for more details related with the above listed (gradl
         tag = "$repName:$project.version"
     }
 
-The _buildDocker_ Gradle task does the following :
+The _buildDocImage_ Gradle task does the following :
 
 * runs the _build_ and the _prepareDockerResources_ before the Docker image is build
 * the _build_ task builds the application war file, required by the docker image
 * the _prepareDockerResources_ task copies all the required resources (for the Docker image) in the proper location. The Docker images can contain only files located under a certain directory; this directory is named context, only files and directories in the context can be added during (the image) build. For more information about the Docker context consider the [understanding context in Docker file](http://kimh.github.io/blog/en/docker/gotchas-in-writing-dockerfile-en/#add_and_understanding_context_in_dockerfile)  article.
+* * the _prepareDockerResources_ task is also take cares that the the application jar file name in the Docker file is the right one; the application jar name changes as far as the (project) version changes.
 * the new created image is tagged with a tag with the following syntax 'REPOSITORY/PROJECT:VERSION'. The tag syntax corresponds the [Docker needs](). The REPOSITORY is the URL for the docker repository where the image will be published, at this stage the image is still not published. 
 * the image name is _"localhost:5000/perk0ns"_ with the tag _"1.0"_,  this information originates from gradle project. Consult [this article](https://docs.docker.com/userguide/dockerimages/) for more details related to the docker image name and tag.
 
@@ -131,16 +134,16 @@ If the task run properly you must be able to see the docker new image by using t
     docker images
 
     REPOSITORY               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-    localhost:5000/perk0ns   1.0                 9e8cfe28fe93        37 hours ago        868.7 MB
+    localhost:5000/systodo   0.0.1-SNAPSHOT      9e8cfe28fe93        37 hours ago        868.7 MB
     python                   latest              575cb3ad9b67        3 weeks ago         685.7 MB
     registry                 2                   2f1ef7702586        7 weeks ago         220.6 MB
     mysql                    latest              c45e4ba02f47        7 weeks ago         283.8 MB
     java                     8                   49ebfec495e1        11 weeks ago        816.4 MB
 
 
-The _buildDocker_ only builds the _localhost:5000/perk0ns_ image. The rest of the images are just images that exist only on my local machine.
+The _buildDocImage_ only builds the _localhost:5000/systodo_ image. The rest of the images are just images that exist only on my local machine.
 
-##### _tagDocker_ task
+##### _tagDocImage_ task
 
     task tagDocker(type: DockerTagImage) {
         dependsOn buildDocker
@@ -151,9 +154,9 @@ The _buildDocker_ only builds the _localhost:5000/perk0ns_ image. The rest of th
     }
 
 It builds and tags with the tag _latest_ a Docker image based on the underlying project. This task is similar with the _buildDocker_ task above defined, the only difference is that the tag name is in this case _latest_. 
-If this task runs you will be able to see two different tags for your image (same image id but different tags), a _1.0_ (the actual project version) and a _latest_ tag. The _latest_ tag is a Docker convention, it is assigned to the image that corresponds to the latest project (image) version. The _latest_ tag is a Docker convention, if you try to run/pull an image without to specify the version information then the image tagged with _latest_ will be chosen. 
+If this task runs you will be able to see two different tags for your image (same image id but different tags), a _0.0.1-SNAPSHOT_ (the actual project version) and a _latest_ tag. The _latest_ tag is a Docker convention, it is assigned to the image that corresponds to the latest project (image) version. The _latest_ tag is a Docker convention, if you try to run/pull an image without to specify the version information then the image tagged with _latest_ will be chosen. 
 
-##### _pushDocker_ task
+##### _pushDocImage_ task
 
     task pushDocker(type: DockerPushImage ) {
         dependsOn tagDocker
@@ -180,7 +183,7 @@ You can browse the file based repository by using the the following command:
 
 or run the _connect-to-local-registry.bash_ script located in the _.../src/main/bash_ directory. If this script runs properly you will be log in the _docker container_ that host the docker repository. Go on _/var/lib/registry/docker/registry/v2/repositories_ and you will be able to see your image, or at least the way how docker store it.
 
-##### _createDocker_ task
+##### _createDocContainer_ task
 
     task createDocker(type: DockerCreateContainer) {
         dependsOn buildDocker
@@ -206,7 +209,7 @@ Usually the docker containers are running isolated, our application is a web bas
 
 If the task run properly you must be able to see the new docker container by using the _docker ps -a_ command, the result must be similar with the following output.
 
-    gradlew createDocker
+    gradlew createDocContainer
     
     docker ps -a
 
