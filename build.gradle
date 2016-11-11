@@ -61,8 +61,9 @@ docker {
 }
 
 task prepareDockerResources(type: Copy) {
+    from jar
     from ("$project.projectDir/src/main/docker/Dockerfile") {
-        filter{ it.replaceAll('@@jarfile@@', "$jar.baseName" + "$project.version" + '.jar')}
+        filter{ it.replaceAll('@@jarfile@@', "$jar.baseName" + '-' + "$project.version" + '.jar')}
     }
     into "$project.buildDir/docker"
 }
