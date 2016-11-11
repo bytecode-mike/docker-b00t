@@ -5,26 +5,33 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.2.3.RELEASE</version>
+        <version>1.3.2.RELEASE</version>
     </parent>
 
-    <groupId>edu.perkons</groupId>
-    <artifactId>perk0ns-web</artifactId>
-    <version>1.0.0</version>
+    <groupId>edu.sisyphus</groupId>
+    <artifactId>systodo</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Spring Boot Docker MySQL Sample</name>
+    <name>Sisyphus TODO list</name>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
+    <url>https://github.com/bytecode-mike/docker-b00t</url>
+	<description>
+	This projects puts together a simple SpringBoot / AngularJS application and it publish it
+	as Docker image. This is not a Spring Boot or Angular JS tutorial, the focus is on the
+	Docker and on the possible way to use it (together with a SpringBoot/ AngularJS/MySQL
+	database).
+	</description>
+
 
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <start-class>edu.sisyphus.Application</start-class>
-        <docker.image.prefix>perkons</docker.image.prefix>
     </properties>
 
     <dependencies>
@@ -68,10 +75,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.2.6</version>
+                <version>0.4.0</version>
                 <configuration>
                     <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
                     <dockerDirectory>src/main/docker</dockerDirectory>
