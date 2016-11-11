@@ -5,4 +5,4 @@ docker run --name systoto \
            --link sys_db:localhost \
            -d \
            -p 80:8080 \
-           localhost:5000/systodo:1.0
+           localhost:5000/systodo:latest

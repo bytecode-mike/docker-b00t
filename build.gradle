@@ -100,7 +100,7 @@ task pushDocImage(type: DockerPushImage ) {
 task createDocContainer(type: DockerCreateContainer) {
     dependsOn buildDocImage
     imageId = buildDocImage.getTag()
-    links = ['perkonsmysql:localhost']
+    links = ['sys_db:localhost']
     exposedPorts =["tcp":8080]
     portBindings = '80:8080'
     containerName = "$project.name-$project.version"
